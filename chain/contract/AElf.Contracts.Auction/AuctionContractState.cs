@@ -1,4 +1,5 @@
 using AElf.Sdk.CSharp.State;
+using AElf.Types;
 
 namespace AElf.Contracts.Auction
 {
@@ -8,5 +9,8 @@ namespace AElf.Contracts.Auction
     public class AuctionContractState : ContractState
     {
         // state definitions go here.
+
+        public MappedState<Hash,Auction> Auctions { get; set; }
+        
     }
 }

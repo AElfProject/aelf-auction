@@ -38,24 +38,83 @@ service AuctionContract {
 
     rpc Create (CreateDto) returns (CreateResultDto) {
     }
+
+    rpc Bid (BidDto) returns (BidResultDto) {
+
+    }
+
+    rpc Initialize (InitializeDto) returns (google.protobuf.Empty) {
+        
+    }
 }
 
+//will use virtual address to call back to __callback_auction
 message AuctionNotification {
     aelf.Hash auction_id = 1;
     aelf.Address winner = 2;
 }
 
+enum AuctionStatus {
+    ACTIVE = 0;
+    ENDED = 1;
+    CANCELLED = 2;
+}
+message Auction {
+
+
+    aelf.Address address = 1;
+    string token_symbol = 2;
+    int64 min_amount = 3;
+    google.protobuf.Timestamp expired_date = 4;
+
+    aelf.Address last_bidder = 5;
+    int64 last_bidder_amount = 6;
+    AuctionStatus status = 7;
+}
+
 message CreateDto {
-    string method = 1;
-    bytes params = 2;
-    aelf.Address address = 3;
-    string token_symbol = 4;
-    int64 min_amount = 5;
-    google.protobuf.Timestamp expired_date = 6;
+    aelf.Address address = 1;
+    string token_symbol = 2;
+    int64 min_amount = 3;
+    google.protobuf.Timestamp expired_date = 4;
+}
+
+
+message InitializeDto {
+
 }
 
 message CreateResultDto {
+    aelf.Hash id = 1;
+}
 
+message BidDto {
+    aelf.Hash id = 1;
+    int64 amount = 2;
+}
+enum BidStatus {
+    PENDING = 0;
+    AWARDED = 1;
+    REJECTED = 2;
+}
+message BidResultDto {
+    BidStatus status = 1;
+}
+
+message BidEvent {
+    option (aelf.is_event) = true;
+    aelf.Hash id = 1 [(aelf.is_indexed) = true];
+    aelf.Address bidder = 2 [(aelf.is_indexed) = true];
+    string symbol = 3;
+    sint64 amount = 4;
+}
+
+message BidSuccessEvent {
+    option (aelf.is_event) = true;
+    aelf.Hash id = 1 [(aelf.is_indexed) = true];
+    aelf.Address bidder = 2 [(aelf.is_indexed) = true];
+    string symbol = 3;
+    sint64 amount = 4;
 }
 
 // a custom message, used as the return type of the Hello action

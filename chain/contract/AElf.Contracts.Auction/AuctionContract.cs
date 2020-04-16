@@ -19,5 +19,41 @@ namespace AElf.Contracts.Auction
         {
             return new HelloReturn {Value = "Hello World!"};
         }
+
+        public override CreateResultDto Create(CreateDto input)
+        {
+            var id = Context.TransactionId;
+
+            Assert(State.Auctions[id] == null, "auction already exists");
+
+            Auction auction = new Auction()
+            {
+                Address = input.Address,
+                Status = AuctionStatus.Active,
+                ExpiredDate = input.ExpiredDate,
+                MinAmount = input.MinAmount,
+                TokenSymbol = input.TokenSymbol,
+            };
+            State.Auctions[id] = auction;
+
+            return new CreateResultDto()
+            {
+                Id = id
+            };
+        }
+
+        public override BidResultDto Bid(BidDto input)
+        {
+            return new BidResultDto()
+            {
+                Status = BidStatus.Awarded
+            };
+        }
+
+        public override Empty Initialize(InitializeDto input)
+        {
+            
+            return new Empty();
+        }
     }
 }
