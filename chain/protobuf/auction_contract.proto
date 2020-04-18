@@ -43,12 +43,26 @@ service AuctionContract {
 
     }
 
+    rpc ReleaseAuction (aelf.Hash) returns (google.protobuf.Empty) {
+
+    }
+
     rpc Initialize (InitializeDto) returns (google.protobuf.Empty) {
-        
+
+    }
+
+    rpc GetSelfVirtualAddress (google.protobuf.Empty) returns (aelf.Address) {
+        option (aelf.is_view) = true;
+
+    }
+
+    rpc GetVirtualAddress (aelf.Address) returns (aelf.Address) {
+        option (aelf.is_view) = true;
+
     }
 }
 
-//will use virtual address to call back to __callback_auction
+//will use contract address to call back to __callback_auction
 message AuctionNotification {
     aelf.Hash auction_id = 1;
     aelf.Address winner = 2;
@@ -60,9 +74,7 @@ enum AuctionStatus {
     CANCELLED = 2;
 }
 message Auction {
-
-
-    aelf.Address address = 1;
+    aelf.Address receiver = 1;
     string token_symbol = 2;
     int64 min_amount = 3;
     google.protobuf.Timestamp expired_date = 4;
@@ -70,13 +82,17 @@ message Auction {
     aelf.Address last_bidder = 5;
     int64 last_bidder_amount = 6;
     AuctionStatus status = 7;
+
+    aelf.Address callback = 8;
 }
 
 message CreateDto {
-    aelf.Address address = 1;
+    aelf.Address receiver = 1;
     string token_symbol = 2;
     int64 min_amount = 3;
     google.protobuf.Timestamp expired_date = 4;
+
+    aelf.Address callback = 8;
 }
 
 
