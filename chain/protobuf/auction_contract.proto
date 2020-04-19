@@ -51,7 +51,7 @@ service AuctionContract {
 
     }
 
-    rpc GetSelfVirtualAddress (google.protobuf.Empty) returns (aelf.Address) {
+    rpc GetSenderVirtualAddress (google.protobuf.Empty) returns (aelf.Address) {
         option (aelf.is_view) = true;
 
     }

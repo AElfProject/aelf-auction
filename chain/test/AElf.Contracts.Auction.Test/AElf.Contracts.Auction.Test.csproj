@@ -26,6 +26,9 @@
     <ContractStub Include="..\..\protobuf\auction_contract.proto">
       <Link>Protobuf\Proto\auction_contract.proto</Link>
     </ContractStub>
+    <ContractStub Include="..\..\protobuf\caller_contract.proto">
+      <Link>Protobuf\Proto\caller_contract.proto</Link>
+    </ContractStub>
     <ContractStub Include="..\..\protobuf\token_contract.proto">
       <Link>Protobuf\Proto\token_contract.proto</Link>
     </ContractStub>
@@ -33,6 +36,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\contract\AElf.Contracts.Auction\AElf.Contracts.Auction.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\contract\AElf.Contracts.CallerContract\AElf.Contracts.CallerContract.csproj" />
   </ItemGroup>
 
   <ItemGroup>

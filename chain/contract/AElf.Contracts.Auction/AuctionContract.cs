@@ -35,6 +35,8 @@ namespace AElf.Contracts.Auction
                 ExpiredDate = input.ExpiredDate,
                 MinAmount = input.MinAmount,
                 TokenSymbol = input.TokenSymbol,
+                Callback = input.Callback,
+                Receiver = input.Receiver,
             };
             State.Auctions[id] = auction;
 
@@ -71,12 +73,17 @@ namespace AElf.Contracts.Auction
                             Symbol = auction.TokenSymbol,
                             To = auction.Receiver,
                         });
-                    Context.SendInline(auction.Callback, "__callback_auction",
-                        new AuctionNotification()
-                        {
-                            Winner = auction.LastBidder,
-                            AuctionId = id
-                        });
+
+                    if (!auction.Callback.Value.IsEmpty)
+                    {
+                        Context.SendInline(auction.Callback, "__callback_auction",
+                            new AuctionNotification()
+                            {
+                                Winner = auction.LastBidder,
+                                AuctionId = id
+                            });
+                    }
+
                     Context.Fire(new BidSuccessEvent()
                     {
                         Amount = auction.LastBidderAmount,
@@ -112,7 +119,7 @@ namespace AElf.Contracts.Auction
             }
 
 
-            var vAddressToken = GetSelfVirtualAddressToken();
+            var vAddressToken = GetSenderVirtualAddressToken();
 
 
             if (auction.LastBidderAmount > 0)
@@ -176,19 +183,19 @@ namespace AElf.Contracts.Auction
             return Hash.FromRawBytes(address.ToByteArray());
         }
 
-        private Hash GetSelfVirtualAddressToken()
+        private Hash GetSenderVirtualAddressToken()
         {
-            return GetVirtualAddressToken(Context.Self);
+            return GetVirtualAddressToken(Context.Sender);
         }
 
-        public override Address GetSelfVirtualAddress(Empty input)
+        public override Address GetSenderVirtualAddress(Empty input)
         {
-            return GetSelfVirtualAddress();
+            return GetSenderVirtualAddress();
         }
 
-        private Address GetSelfVirtualAddress()
+        private Address GetSenderVirtualAddress()
         {
-            return GetVirtualAddress(Context.Self);
+            return GetVirtualAddress(Context.Sender);
         }
     }
 }

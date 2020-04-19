@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AElf.Boilerplate.Tester", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AElf.Boilerplate.CodeGenerator", "src\AElf.Boilerplate.CodeGenerator\AElf.Boilerplate.CodeGenerator.csproj", "{1E374BCA-7093-43A4-A419-23999B147B1A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AElf.Contracts.CallerContract", "contract\AElf.Contracts.CallerContract\AElf.Contracts.CallerContract.csproj", "{6E7D3074-080B-40E6-AB50-0A3BF3EDC5D0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,6 +62,10 @@ Global
 		{1E374BCA-7093-43A4-A419-23999B147B1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E374BCA-7093-43A4-A419-23999B147B1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1E374BCA-7093-43A4-A419-23999B147B1A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E7D3074-080B-40E6-AB50-0A3BF3EDC5D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E7D3074-080B-40E6-AB50-0A3BF3EDC5D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E7D3074-080B-40E6-AB50-0A3BF3EDC5D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E7D3074-080B-40E6-AB50-0A3BF3EDC5D0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -72,6 +78,7 @@ Global
 		{AC06E580-EFC8-4D3F-BA4A-B2D2D1F65B9F} = {5C980166-C987-470D-AEE0-3858A170A903}
 		{217599C5-2CF0-411E-97B5-5657739CEE5D} = {21D85A91-5BB8-4912-8107-49435A461AAC}
 		{1E374BCA-7093-43A4-A419-23999B147B1A} = {21D85A91-5BB8-4912-8107-49435A461AAC}
+		{6E7D3074-080B-40E6-AB50-0A3BF3EDC5D0} = {5C980166-C987-470D-AEE0-3858A170A903}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D7426B41-E959-40E4-9ED8-ED8D9C50F133}

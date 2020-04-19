@@ -34,7 +34,7 @@ namespace AElf.Contracts.Auction
 
         private void InitializeContracts()
         {
-            ZeroContractStub = GetZeroContractStub(SampleECKeyPairs.KeyPairs.First());
+            ZeroContractStub = GetZeroContractStub(DefaultKeyPair);
 
             AuctionContractAddress = AsyncHelper.RunSync(() =>
                 ZeroContractStub.DeploySystemSmartContract.SendAsync(
@@ -46,7 +46,7 @@ namespace AElf.Contracts.Auction
                         TransactionMethodCallList =
                             new SystemContractDeploymentInput.Types.SystemTransactionMethodCallList()
                     })).Output;
-            AuctionContractStub = GetAuctionContractStub(SampleECKeyPairs.KeyPairs.First());
+            AuctionContractStub = GetAuctionContractStub(DefaultKeyPair);
 
 
             TokenContractAddress = AsyncHelper.RunSync(() =>
@@ -73,12 +73,12 @@ namespace AElf.Contracts.Auction
             return GetTester<ACS0Container.ACS0Stub>(ContractZeroAddress, keyPair);
         }
 
-        private AuctionContractContainer.AuctionContractStub GetAuctionContractStub(ECKeyPair keyPair)
+        internal AuctionContractContainer.AuctionContractStub GetAuctionContractStub(ECKeyPair keyPair)
         {
             return GetTester<AuctionContractContainer.AuctionContractStub>(AuctionContractAddress, keyPair);
         }
 
-        private TokenContractContainer.TokenContractStub GetTokenContractStub(ECKeyPair keyPair)
+        internal TokenContractContainer.TokenContractStub GetTokenContractStub(ECKeyPair keyPair)
         {
             return GetTester<TokenContractContainer.TokenContractStub>(TokenContractAddress, keyPair);
         }
