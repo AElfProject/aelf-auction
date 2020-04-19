@@ -1,4 +1,7 @@
+using System;
 using System.Threading.Tasks;
+using AElf.CSharp.Core.Extension;
+using AElf.Kernel;
 using AElf.Types;
 using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
@@ -17,6 +20,20 @@ namespace AElf.Contracts.Auction
             var text = new HelloReturn();
             text.MergeFrom(txResult.TransactionResult.ReturnValue);
             text.Value.ShouldBe("Hello World!");
+        }
+
+
+        [Fact]
+        public async Task Main()
+        {
+            var createResult = await AuctionContractStub.Create.SendAsync(new CreateDto()
+            {
+                Callback = AuctionContractAddress,
+                Receiver = Address.FromPublicKey(this.DefaultKeyPair.PublicKey),
+                ExpiredDate = TimestampHelper.GetUtcNow().AddSeconds(1),
+                MinAmount = 10,
+                TokenSymbol = "ELF"
+            });
         }
     }
 }

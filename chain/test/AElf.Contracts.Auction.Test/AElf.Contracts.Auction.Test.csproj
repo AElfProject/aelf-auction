@@ -26,10 +26,17 @@
     <ContractStub Include="..\..\protobuf\auction_contract.proto">
       <Link>Protobuf\Proto\auction_contract.proto</Link>
     </ContractStub>
+    <ContractStub Include="..\..\protobuf\token_contract.proto">
+      <Link>Protobuf\Proto\token_contract.proto</Link>
+    </ContractStub>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\contract\AElf.Contracts.Auction\AElf.Contracts.Auction.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AElf.Contracts.MultiToken" Version="1.0.0-preview1" />
   </ItemGroup>
 
 </Project>

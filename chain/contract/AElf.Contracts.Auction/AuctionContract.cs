@@ -49,7 +49,7 @@ namespace AElf.Contracts.Auction
             var auction = State.Auctions[id];
             Assert(auction != null, "auction not exists");
 
-            ReleaseAuction(id);
+            ReleaseAuction(id, auction);
 
             return new Empty();
         }
