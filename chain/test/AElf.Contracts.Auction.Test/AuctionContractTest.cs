@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using AElf.Contracts.MultiToken;
 using AElf.Contracts.TestKit;
@@ -9,6 +10,7 @@ using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using Shouldly;
 using Xunit;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AElf.Contracts.Auction
 {
@@ -32,7 +34,7 @@ namespace AElf.Contracts.Auction
             {
                 Callback = new Address(),
                 Receiver = Address.FromPublicKey(this.DefaultKeyPair.PublicKey),
-                ExpiredDate = TimestampHelper.GetUtcNow().AddSeconds(1),
+                ExpiredDate = TimestampHelper.GetUtcNow().AddSeconds(100),
                 MinAmount = 10,
                 TokenSymbol = "ELF"
             });
@@ -51,7 +53,7 @@ namespace AElf.Contracts.Auction
             var vUserAddress = await AuctionContractStub.GetSenderVirtualAddress.CallAsync(new Empty());
 
 
-            //Deposit to virtual address
+            //Deposit 40 to virtual address
             await TokenContractStub.Transfer.SendAsync(new TransferInput()
             {
                 Amount = 40,
@@ -62,6 +64,7 @@ namespace AElf.Contracts.Auction
 
             await CheckBalance(vUserAddress, 40);
 
+            //bid 11
             var successBid = await AuctionContractStub.Bid.SendAsync(new BidDto()
             {
                 Amount = 11,
@@ -73,6 +76,16 @@ namespace AElf.Contracts.Auction
             await CheckBalance(vUserAddress, 29);
 
 
+            //bid 11 again, will be rejected
+            successBid = await AuctionContractStub.Bid.SendAsync(new BidDto()
+            {
+                Amount = 11,
+                Id = id
+            });
+
+            successBid.Output.Status.ShouldBe(BidStatus.Rejected);
+
+            //bid 12, success 
             successBid = await AuctionContractStub.Bid.SendAsync(new BidDto()
             {
                 Amount = 12,
@@ -84,6 +97,8 @@ namespace AElf.Contracts.Auction
 
             Assert.Equal(BidStatus.Awarded, successBid.Output.Status);
 
+
+            //bid 30, balance is 28, but will refund 12, so it will also success
             successBid = await AuctionContractStub.Bid.SendAsync(new BidDto()
             {
                 Amount = 30,
@@ -102,8 +117,107 @@ namespace AElf.Contracts.Auction
 
             await CheckBalance(vUserAddress, 10);
 
-
+            //another user join the auction
             var user1Address = Address.FromPublicKey(SampleECKeyPairs.KeyPairs[1].PublicKey);
+
+            var user1AuctionContractStub = GetAuctionContractStub(SampleECKeyPairs.KeyPairs[1]);
+
+            var user1VAddress = await user1AuctionContractStub.GetSenderVirtualAddress.CallAsync(new Empty());
+
+            //deposit 100
+            await TokenContractStub.Transfer.SendAsync(new TransferInput()
+            {
+                Amount = 100,
+                Symbol = "ELF",
+                To = user1VAddress
+            });
+
+            await CheckBalance(user1VAddress, 100);
+
+            //test withdraw
+            await user1AuctionContractStub.Withdraw.SendAsync(new WithdrawDto() {Symbol = "ELF"});
+
+            await CheckBalance(user1VAddress, 0);
+            await CheckBalance(user1Address, 100);
+
+
+            //deposit 200
+            await TokenContractStub.Transfer.SendAsync(new TransferInput()
+            {
+                Amount = 200,
+                Symbol = "ELF",
+                To = user1VAddress
+            });
+
+
+            //bid for 30, as lastBidder is also 30, be rejected
+            successBid = await user1AuctionContractStub.Bid.SendAsync(new BidDto()
+            {
+                Amount = 30,
+                Id = id
+            });
+
+
+            successBid.Output.Status.ShouldBe(BidStatus.Rejected);
+
+            successBid = await user1AuctionContractStub.Bid.SendAsync(new BidDto()
+            {
+                Amount = 31,
+                Id = id
+            });
+
+            successBid.Output.Status.ShouldBe(BidStatus.Awarded);
+
+            successBid = await AuctionContractStub.Bid.SendAsync(new BidDto()
+            {
+                Amount = 31,
+                Id = id
+            });
+
+            successBid.Output.Status.ShouldBe(BidStatus.Rejected);
+
+
+            successBid = await AuctionContractStub.Bid.SendAsync(new BidDto()
+            {
+                Amount = 32,
+                Id = id
+            });
+
+            successBid.Output.Status.ShouldBe(BidStatus.Awarded);
+
+            successBid = await user1AuctionContractStub.Bid.SendAsync(new BidDto()
+            {
+                Amount = 33,
+                Id = id
+            });
+
+            successBid.Output.Status.ShouldBe(BidStatus.Awarded);
+
+            var blockTimeProvider = Application.ServiceProvider.GetService<IBlockTimeProvider>();
+
+            //this time, auction is expired
+            blockTimeProvider.SetBlockTime(TimestampHelper.GetUtcNow().AddSeconds(100));
+
+            successBid = await user1AuctionContractStub.Bid.SendAsync(new BidDto()
+            {
+                Amount = 35,
+                Id = id
+            });
+
+            successBid.Output.Status.ShouldBe(BidStatus.Rejected);
+
+
+            //check auction success log event
+
+            var successLogEvent = successBid.TransactionResult.Logs.First(
+                l => l.Name.Contains(nameof(AuctionSuccessEvent)));
+
+            var bidSuccessEvent = AuctionSuccessEvent.Parser
+                .ParseFrom(
+                    successLogEvent.NonIndexed);
+            bidSuccessEvent.Amount.ShouldBe(33);
+
+            //bidSuccessEvent.Bidder.ShouldBe(user1Address);
         }
 
         private async Task CheckBalance(Address vAddress, long expect)

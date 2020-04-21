@@ -84,7 +84,7 @@ namespace AElf.Contracts.Auction
                             });
                     }
 
-                    Context.Fire(new BidSuccessEvent()
+                    Context.Fire(new AuctionSuccessEvent()
                     {
                         Amount = auction.LastBidderAmount,
                         Bidder = auction.LastBidder,
@@ -110,7 +110,7 @@ namespace AElf.Contracts.Auction
                 };
             }
 
-            if (auction.LastBidderAmount > input.Amount || auction.MinAmount > input.Amount)
+            if (auction.LastBidderAmount >= input.Amount || auction.MinAmount > input.Amount)
             {
                 return new BidResultDto()
                 {
@@ -196,6 +196,31 @@ namespace AElf.Contracts.Auction
         private Address GetSenderVirtualAddress()
         {
             return GetVirtualAddress(Context.Sender);
+        }
+
+
+        public override Empty Withdraw(WithdrawDto input)
+        {
+            var virtualAddressToken = GetSenderVirtualAddressToken();
+            var virtualAddress = Context.ConvertVirtualAddressToContractAddress(virtualAddressToken);
+            var balance = State.TokenContract.GetBalance.Call(new GetBalanceInput()
+            {
+                Owner = virtualAddress,
+                Symbol = input.Symbol
+            });
+
+            Context.SendVirtualInline(
+                virtualAddressToken,
+                State.TokenContract.Value,
+                nameof(State.TokenContract.Transfer),
+                new TransferInput()
+                {
+                    Amount = balance.Balance,
+                    Symbol = balance.Symbol,
+                    To = Context.Sender,
+                });
+
+            return new Empty();
         }
     }
 }

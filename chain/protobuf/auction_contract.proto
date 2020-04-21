@@ -60,6 +60,10 @@ service AuctionContract {
         option (aelf.is_view) = true;
 
     }
+
+    rpc Withdraw (WithdrawDto) returns (google.protobuf.Empty) {
+
+    }
 }
 
 //will use contract address to call back to __callback_auction
@@ -117,6 +121,11 @@ message BidResultDto {
     BidStatus status = 1;
 }
 
+
+message WithdrawDto {
+    string symbol = 1;
+}
+
 message BidEvent {
     option (aelf.is_event) = true;
     aelf.Hash id = 1 [(aelf.is_indexed) = true];
@@ -125,7 +134,7 @@ message BidEvent {
     sint64 amount = 4;
 }
 
-message BidSuccessEvent {
+message AuctionSuccessEvent {
     option (aelf.is_event) = true;
     aelf.Hash id = 1 [(aelf.is_indexed) = true];
     aelf.Address bidder = 2 [(aelf.is_indexed) = true];
