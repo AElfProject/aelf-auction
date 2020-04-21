@@ -54,11 +54,19 @@ namespace AElf.Contracts.Auction
             //Deposit to virtual address
             await TokenContractStub.Transfer.SendAsync(new TransferInput()
             {
-                Amount = 20,
+                Amount = 40,
                 To = vAddress,
                 Symbol = "ELF"
             });
 
+
+            {
+                var balanceOutput =
+                    await TokenContractStub.GetBalance.CallAsync(new GetBalanceInput()
+                        {Owner = vAddress, Symbol = "ELF"});
+
+                Assert.Equal(40, balanceOutput.Balance);
+            }
             var successBid = await AuctionContractStub.Bid.SendAsync(new BidDto()
             {
                 Amount = 11,
@@ -66,6 +74,15 @@ namespace AElf.Contracts.Auction
             });
 
             Assert.True(successBid.Output.Status == BidStatus.Awarded);
+            
+            {
+                var balanceOutput =
+                    await TokenContractStub.GetBalance.CallAsync(new GetBalanceInput()
+                        {Owner = vAddress, Symbol = "ELF"});
+
+                Assert.Equal(29, balanceOutput.Balance);
+            }
+            
 
             successBid = await AuctionContractStub.Bid.SendAsync(new BidDto()
             {
