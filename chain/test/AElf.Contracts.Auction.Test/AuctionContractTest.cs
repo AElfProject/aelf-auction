@@ -48,25 +48,20 @@ namespace AElf.Contracts.Auction
             Assert.Equal(BidStatus.Rejected, failedBid.Output.Status);
 
 
-            var vAddress = await AuctionContractStub.GetSenderVirtualAddress.CallAsync(new Empty());
+            var vUserAddress = await AuctionContractStub.GetSenderVirtualAddress.CallAsync(new Empty());
 
 
             //Deposit to virtual address
             await TokenContractStub.Transfer.SendAsync(new TransferInput()
             {
                 Amount = 40,
-                To = vAddress,
+                To = vUserAddress,
                 Symbol = "ELF"
             });
 
 
-            {
-                var balanceOutput =
-                    await TokenContractStub.GetBalance.CallAsync(new GetBalanceInput()
-                        {Owner = vAddress, Symbol = "ELF"});
+            await CheckBalance(vUserAddress, 40);
 
-                Assert.Equal(40, balanceOutput.Balance);
-            }
             var successBid = await AuctionContractStub.Bid.SendAsync(new BidDto()
             {
                 Amount = 11,
@@ -74,15 +69,9 @@ namespace AElf.Contracts.Auction
             });
 
             Assert.True(successBid.Output.Status == BidStatus.Awarded);
-            
-            {
-                var balanceOutput =
-                    await TokenContractStub.GetBalance.CallAsync(new GetBalanceInput()
-                        {Owner = vAddress, Symbol = "ELF"});
 
-                Assert.Equal(29, balanceOutput.Balance);
-            }
-            
+            await CheckBalance(vUserAddress, 29);
+
 
             successBid = await AuctionContractStub.Bid.SendAsync(new BidDto()
             {
@@ -90,10 +79,40 @@ namespace AElf.Contracts.Auction
                 Id = id
             });
 
+            await CheckBalance(vUserAddress, 28);
+
+
             Assert.Equal(BidStatus.Awarded, successBid.Output.Status);
+
+            successBid = await AuctionContractStub.Bid.SendAsync(new BidDto()
+            {
+                Amount = 30,
+                Id = id
+            });
+
+            await CheckBalance(vUserAddress, 10); // 10 = 28 + 12 - 30
+
+            failedBid = await AuctionContractStub.Bid.SendWithExceptionAsync(new BidDto()
+            {
+                Amount = 50,
+                Id = id
+            });
+
+            failedBid.TransactionResult.Error.Contains("Insufficient balance").ShouldBeTrue();
+
+            await CheckBalance(vUserAddress, 10);
 
 
             var user1Address = Address.FromPublicKey(SampleECKeyPairs.KeyPairs[1].PublicKey);
+        }
+
+        private async Task CheckBalance(Address vAddress, long expect)
+        {
+            var balanceOutput =
+                await TokenContractStub.GetBalance.CallAsync(new GetBalanceInput()
+                    {Owner = vAddress, Symbol = "ELF"});
+
+            Assert.Equal(expect, balanceOutput.Balance);
         }
     }
 }

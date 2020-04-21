@@ -131,7 +131,7 @@ namespace AElf.Contracts.Auction
                     nameof(State.TokenContract.Transfer),
                     new TransferInput()
                     {
-                        Amount = input.Amount,
+                        Amount = auction.LastBidderAmount,
                         Symbol = auction.TokenSymbol,
                         To = GetVirtualAddress(auction.LastBidder),
                     });
