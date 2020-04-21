@@ -195,7 +195,7 @@ namespace AElf.Contracts.Auction
 
             var blockTimeProvider = Application.ServiceProvider.GetService<IBlockTimeProvider>();
 
-            //this time, auction is expired
+            //this time, auction is expired, so we will release the auction, fire success event 
             blockTimeProvider.SetBlockTime(TimestampHelper.GetUtcNow().AddSeconds(100));
 
             successBid = await user1AuctionContractStub.Bid.SendAsync(new BidDto()
@@ -212,12 +212,12 @@ namespace AElf.Contracts.Auction
             var successLogEvent = successBid.TransactionResult.Logs.First(
                 l => l.Name.Contains(nameof(AuctionSuccessEvent)));
 
-            var bidSuccessEvent = AuctionSuccessEvent.Parser
-                .ParseFrom(
-                    successLogEvent.NonIndexed);
-            bidSuccessEvent.Amount.ShouldBe(33);
-
-            //bidSuccessEvent.Bidder.ShouldBe(user1Address);
+            
+            var auctionSuccessEvent =new AuctionSuccessEvent();
+            auctionSuccessEvent.MergeFrom(successLogEvent);
+            
+            auctionSuccessEvent.Amount.ShouldBe(33);
+            auctionSuccessEvent.Bidder.ShouldBe(user1Address);
         }
 
         private async Task CheckBalance(Address vAddress, long expect)

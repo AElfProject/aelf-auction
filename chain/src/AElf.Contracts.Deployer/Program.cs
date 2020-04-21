@@ -60,16 +60,12 @@ namespace AElf.Contracts.Deployer
             {
                 try
                 {
-                    var auditor = new CSharpContractAuditor(null, null);
+                    var auditor = new CSharpContractAuditor();
                     auditor.Audit(patchedCode, null);
                 }
-                catch (CSharpInvalidCodeException ex)
+                catch (Exception ex)
                 {
-                    foreach (var finding in ex.Findings)
-                    {
-                        // Print error in parsable format so that it can be shown in IDE
-                        Console.WriteLine($"error: {finding.ToString()}");
-                    }
+                    Console.WriteLine(ex);
                 }
             }
 

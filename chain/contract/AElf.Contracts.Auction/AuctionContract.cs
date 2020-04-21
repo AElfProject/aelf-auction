@@ -125,29 +125,21 @@ namespace AElf.Contracts.Auction
             if (auction.LastBidderAmount > 0)
             {
                 //give the money back to the last bidder 
-                Context.SendVirtualInline(
-                    input.Id,
-                    State.TokenContract.Value,
-                    nameof(State.TokenContract.Transfer),
-                    new TransferInput()
-                    {
-                        Amount = auction.LastBidderAmount,
-                        Symbol = auction.TokenSymbol,
-                        To = GetVirtualAddress(auction.LastBidder),
-                    });
-            }
-
-            //take the money of current bidder 
-            Context.SendVirtualInline(
-                vAddressToken,
-                State.TokenContract.Value,
-                nameof(State.TokenContract.Transfer),
-                new TransferInput()
+                State.TokenContract.Transfer.VirtualSend(input.Id,new TransferInput()
                 {
-                    Amount = input.Amount,
+                    Amount = auction.LastBidderAmount,
                     Symbol = auction.TokenSymbol,
-                    To = Context.ConvertVirtualAddressToContractAddress(input.Id),
+                    To = GetVirtualAddress(auction.LastBidder),
                 });
+            }
+            
+            //take the money of current bidder 
+            State.TokenContract.Transfer.VirtualSend(vAddressToken,new TransferInput()
+            {
+                Amount = input.Amount,
+                Symbol = auction.TokenSymbol,
+                To = Context.ConvertVirtualAddressToContractAddress(input.Id),
+            });
 
             auction.LastBidder = Context.Sender;
             auction.LastBidderAmount = input.Amount;
@@ -180,7 +172,7 @@ namespace AElf.Contracts.Auction
 
         private Hash GetVirtualAddressToken(Address address)
         {
-            return Hash.FromRawBytes(address.ToByteArray());
+            return HashHelper.ComputeFromByteArray(address.ToByteArray());
         }
 
         private Hash GetSenderVirtualAddressToken()
