@@ -64,6 +64,11 @@ service AuctionContract {
     rpc Withdraw (WithdrawDto) returns (google.protobuf.Empty) {
 
     }
+
+    rpc GetAuction (aelf.Hash) returns (Auction) {
+        option (aelf.is_view) = true;
+
+    }
 }
 
 //will use contract address to call back to __callback_auction

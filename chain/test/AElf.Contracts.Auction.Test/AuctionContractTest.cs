@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using AElf.Contracts.CallerContract;
 using AElf.Contracts.MultiToken;
 using AElf.Contracts.TestKit;
 using AElf.CSharp.Core.Extension;
@@ -24,6 +25,69 @@ namespace AElf.Contracts.Auction
             var text = new HelloReturn();
             text.MergeFrom(txResult.TransactionResult.ReturnValue);
             text.Value.ShouldBe("Hello World!");
+        }
+
+        [Fact]
+        public async Task TestCaller()
+        {
+            var createResult = await CallerContractStub.Create.SendAsync(new Empty() { });
+
+
+            var id = createResult.Output;
+            var auction = await AuctionContractStub.GetAuction.CallAsync(id);
+
+            auction.Status.ShouldBe(AuctionStatus.Active);
+
+            var vUserAddress = await AuctionContractStub.GetSenderVirtualAddress.CallAsync(new Empty());
+
+            //Deposit 40 to virtual address
+            await TokenContractStub.Transfer.SendAsync(new TransferInput()
+            {
+                Amount = 40,
+                To = vUserAddress,
+                Symbol = "ELF"
+            });
+
+            var blockTimeProvider = Application.ServiceProvider.GetService<IBlockTimeProvider>();
+
+
+            var successBid = await AuctionContractStub.Bid.SendAsync(new BidDto()
+            {
+                Amount = 11,
+                Id = id
+            });
+
+            successBid.Output.Status.ShouldBe(BidStatus.Awarded);
+
+            //this time, auction is expired, so we will release the auction, fire success event 
+            blockTimeProvider.SetBlockTime(TimestampHelper.GetUtcNow().AddSeconds(200));
+
+            successBid = await AuctionContractStub.Bid.SendAsync(new BidDto()
+            {
+                Amount = 12,
+                Id = id
+            });
+
+            successBid.Output.Status.ShouldBe(BidStatus.Rejected);
+
+
+            //check auction success log event
+            var successLogEvent = successBid.TransactionResult.Logs.First(
+                l => l.Name.Contains(nameof(AuctionSuccessEvent)));
+
+            var auctionSuccessEvent = new AuctionSuccessEvent();
+            auctionSuccessEvent.MergeFrom(successLogEvent);
+
+            auctionSuccessEvent.Amount.ShouldBe(11);
+
+            var callbackLogEvent = successBid.TransactionResult.Logs.First(
+                l => l.Name.Contains(nameof(CallbackEvent)));
+
+
+            var callbackEvent = new CallbackEvent();
+            callbackEvent.MergeFrom(callbackLogEvent);
+
+            callbackEvent.AuctionId.ShouldBe(id);
         }
 
 
@@ -212,10 +276,10 @@ namespace AElf.Contracts.Auction
             var successLogEvent = successBid.TransactionResult.Logs.First(
                 l => l.Name.Contains(nameof(AuctionSuccessEvent)));
 
-            
-            var auctionSuccessEvent =new AuctionSuccessEvent();
+
+            var auctionSuccessEvent = new AuctionSuccessEvent();
             auctionSuccessEvent.MergeFrom(successLogEvent);
-            
+
             auctionSuccessEvent.Amount.ShouldBe(33);
             auctionSuccessEvent.Bidder.ShouldBe(user1Address);
         }

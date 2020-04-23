@@ -1,5 +1,6 @@
 using AElf.Contracts.Auction;
 using AElf.Sdk.CSharp.State;
+using AElf.Types;
 
 namespace AElf.Contracts.CallerContract
 {
@@ -11,5 +12,9 @@ namespace AElf.Contracts.CallerContract
         // state definitions go here.
 
         internal AuctionContractContainer.AuctionContractReferenceState AuctionContract { get; set; }
+
+        public MappedState<Hash, Hash> AuctionToProductDic { get; set; }
+
+        public MappedState<Hash, Product> Products { get; set; }
     }
 }

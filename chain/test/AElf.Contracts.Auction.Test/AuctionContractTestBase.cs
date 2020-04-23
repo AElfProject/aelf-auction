@@ -2,6 +2,7 @@ using System.IO;
 using System.Linq;
 using Acs0;
 using AElf.Blockchains.BasicBaseChain.ContractNames;
+using AElf.Contracts.CallerContract;
 using AElf.Contracts.MultiToken;
 using AElf.Contracts.TestKit;
 using AElf.Cryptography.ECDSA;
@@ -26,6 +27,10 @@ namespace AElf.Contracts.Auction
 
         protected ECKeyPair DefaultKeyPair { get; set; } = SampleECKeyPairs.KeyPairs.First();
 
+        protected Address CallerContractAddress { get; set; }
+
+        internal CallerContractContainer.CallerContractStub CallerContractStub { get; set; }
+
 
         protected AuctionContractTestBase()
         {
@@ -36,17 +41,6 @@ namespace AElf.Contracts.Auction
         {
             ZeroContractStub = GetZeroContractStub(DefaultKeyPair);
 
-            AuctionContractAddress = AsyncHelper.RunSync(() =>
-                ZeroContractStub.DeploySystemSmartContract.SendAsync(
-                    new SystemContractDeploymentInput
-                    {
-                        Category = KernelConstants.DefaultRunnerCategory,
-                        Code = ByteString.CopyFrom(File.ReadAllBytes(typeof(AuctionContract).Assembly.Location)),
-                        Name = ProfitSmartContractAddressNameProvider.Name,
-                        TransactionMethodCallList =
-                            new SystemContractDeploymentInput.Types.SystemTransactionMethodCallList()
-                    })).Output;
-            AuctionContractStub = GetAuctionContractStub(DefaultKeyPair);
 
 
             TokenContractAddress = AsyncHelper.RunSync(() =>
@@ -59,12 +53,36 @@ namespace AElf.Contracts.Auction
                         TransactionMethodCallList = GetTokenContractInitialMethodCallList()
                     })).Output;
             TokenContractStub = GetTokenContractStub(DefaultKeyPair);
+            
+            
+            AuctionContractAddress = AsyncHelper.RunSync(() =>
+                ZeroContractStub.DeploySmartContract.SendAsync(
+                    new ContractDeploymentInput
+                    {
+                        Category = KernelConstants.DefaultRunnerCategory,
+                        Code = ByteString.CopyFrom(File.ReadAllBytes(typeof(AuctionContract).Assembly.Location)),
+                    })).Output;
+            AuctionContractStub = GetAuctionContractStub(DefaultKeyPair);
+
+            CallerContractAddress = AsyncHelper.RunSync(() =>
+                ZeroContractStub.DeploySmartContract.SendAsync(
+                    new ContractDeploymentInput()
+                    {
+                        Category = KernelConstants.DefaultRunnerCategory,
+                        Code = ByteString.CopyFrom(
+                            File.ReadAllBytes(typeof(CallerContract.CallerContract).Assembly.Location))
+                    })).Output;
+            CallerContractStub =
+                GetTester<CallerContractContainer.CallerContractStub>(CallerContractAddress, DefaultKeyPair);
 
             AsyncHelper.RunSync(async () =>
             {
                 await AuctionContractStub.Initialize.SendAsync(new InitializeDto()
                 {
                 });
+
+                await CallerContractStub.Initialize.SendAsync(new CallerContract.InitializeDto()
+                    {AuctionContractAddress = AuctionContractAddress});
             });
         }
 

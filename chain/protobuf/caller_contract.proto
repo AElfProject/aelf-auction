@@ -35,13 +35,22 @@ service CallerContract {
     rpc Hello (google.protobuf.Empty) returns (HelloReturn) {
     }
 
-    rpc Create (google.protobuf.Empty) returns (google.protobuf.Empty) {
+    rpc Create (google.protobuf.Empty) returns (aelf.Hash) {
 
     }
 
     rpc Initialize (InitializeDto) returns (google.protobuf.Empty) {
 
     }
+
+    rpc __callback_auction (AuctionNotification) returns (google.protobuf.Empty) {
+
+    }
+}
+
+message AuctionNotification {
+    aelf.Hash auction_id = 1;
+    aelf.Address winner = 2;
 }
 
 message InitializeDto {
@@ -51,4 +60,14 @@ message InitializeDto {
 // a custom message, used as the return type of the Hello action
 message HelloReturn {
     string Value = 1;
+}
+
+message Product {
+    aelf.Address owner = 1;
+    aelf.Hash auction_id = 2;
+}
+
+message CallbackEvent {
+    option (aelf.is_event) = true;
+    aelf.Hash auction_id = 1 [(aelf.is_indexed) = true];
 }

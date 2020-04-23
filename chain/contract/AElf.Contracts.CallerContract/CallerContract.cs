@@ -1,6 +1,9 @@
 using AElf.Contracts.Auction;
 using AElf.CSharp.Core.Extension;
 using AElf.Kernel;
+using AElf.Kernel.SmartContract;
+using AElf.Sdk.CSharp;
+using AElf.Types;
 using Google.Protobuf.WellKnownTypes;
 
 namespace AElf.Contracts.CallerContract
@@ -23,8 +26,11 @@ namespace AElf.Contracts.CallerContract
             return new HelloReturn {Value = "Hello World!"};
         }
 
-        public override Empty Create(Empty input)
+        public override Hash Create(Empty input)
         {
+            var productId = Context.GenerateId();
+
+
             var auctionId = Context.GenerateId(State.AuctionContract.Value, null);
 
             State.AuctionContract.Create.Send(new CreateDto()
@@ -36,12 +42,37 @@ namespace AElf.Contracts.CallerContract
                 TokenSymbol = "ELF"
             });
 
-            return new Empty();
+
+            State.Products[productId] = new Product()
+            {
+                AuctionId = auctionId
+            };
+
+            State.AuctionToProductDic[auctionId] = productId;
+
+
+            return auctionId;
         }
 
         public override Empty Initialize(InitializeDto input)
         {
             State.AuctionContract.Value = input.AuctionContractAddress;
+
+            return new Empty();
+        }
+
+        public override Empty __callback_auction(AuctionNotification input)
+        {
+            if (Context.Sender !=
+                Context.ConvertVirtualAddressToContractAddress(input.AuctionId, State.AuctionContract.Value))
+                throw new AssertionException("callback sender should be a virtual address of auction");
+
+
+            var productId = State.AuctionToProductDic[input.AuctionId];
+            
+            State.Products[productId].Owner = input.Winner;
+
+            Context.Fire(new CallbackEvent() {AuctionId = input.AuctionId});
 
             return new Empty();
         }

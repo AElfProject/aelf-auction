@@ -64,7 +64,7 @@ namespace AElf.Contracts.Auction
                 if (auction.LastBidderAmount > 0)
                 {
                     //give the money to receiver
-                    State.TokenContract.Transfer.VirtualSend(id,new TransferInput()
+                    State.TokenContract.Transfer.VirtualSend(id, new TransferInput()
                     {
                         Amount = auction.LastBidderAmount,
                         Symbol = auction.TokenSymbol,
@@ -74,7 +74,7 @@ namespace AElf.Contracts.Auction
 
                     if (!auction.Callback.Value.IsEmpty)
                     {
-                        Context.SendInline(auction.Callback, "__callback_auction",
+                        Context.SendVirtualInline(id, auction.Callback, "__callback_auction",
                             new AuctionNotification()
                             {
                                 Winner = auction.LastBidder,
@@ -123,16 +123,16 @@ namespace AElf.Contracts.Auction
             if (auction.LastBidderAmount > 0)
             {
                 //give the money back to the last bidder 
-                State.TokenContract.Transfer.VirtualSend(input.Id,new TransferInput()
+                State.TokenContract.Transfer.VirtualSend(input.Id, new TransferInput()
                 {
                     Amount = auction.LastBidderAmount,
                     Symbol = auction.TokenSymbol,
                     To = GetVirtualAddress(auction.LastBidder),
                 });
             }
-            
+
             //take the money of current bidder 
-            State.TokenContract.Transfer.VirtualSend(vAddressToken,new TransferInput()
+            State.TokenContract.Transfer.VirtualSend(vAddressToken, new TransferInput()
             {
                 Amount = input.Amount,
                 Symbol = auction.TokenSymbol,
@@ -211,6 +211,11 @@ namespace AElf.Contracts.Auction
                 });
 
             return new Empty();
+        }
+
+        public override Auction GetAuction(Hash input)
+        {
+            return State.Auctions[input];
         }
     }
 }
