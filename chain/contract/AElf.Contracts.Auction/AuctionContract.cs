@@ -2,6 +2,7 @@ using AElf.Contracts.MultiToken;
 using AElf.Sdk.CSharp;
 using AElf.Types;
 using Google.Protobuf.WellKnownTypes;
+using AElf.Kernel.SmartContract;
 
 namespace AElf.Contracts.Auction
 {
@@ -25,7 +26,7 @@ namespace AElf.Contracts.Auction
 
         public override CreateResultDto Create(CreateDto input)
         {
-            var id = Context.TransactionId;
+            var id = Context.GenerateId();
 
             Assert(State.Auctions[id] == null, "auction already exists");
 
@@ -63,16 +64,13 @@ namespace AElf.Contracts.Auction
                 if (auction.LastBidderAmount > 0)
                 {
                     //give the money to receiver
-                    Context.SendVirtualInline(
-                        id,
-                        State.TokenContract.Value,
-                        nameof(State.TokenContract.Transfer),
-                        new TransferInput()
-                        {
-                            Amount = auction.LastBidderAmount,
-                            Symbol = auction.TokenSymbol,
-                            To = auction.Receiver,
-                        });
+                    State.TokenContract.Transfer.VirtualSend(id,new TransferInput()
+                    {
+                        Amount = auction.LastBidderAmount,
+                        Symbol = auction.TokenSymbol,
+                        To = auction.Receiver,
+                    });
+
 
                     if (!auction.Callback.Value.IsEmpty)
                     {

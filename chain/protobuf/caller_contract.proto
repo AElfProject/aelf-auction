@@ -36,8 +36,16 @@ service CallerContract {
     }
 
     rpc Create (google.protobuf.Empty) returns (google.protobuf.Empty) {
-        
+
     }
+
+    rpc Initialize (InitializeDto) returns (google.protobuf.Empty) {
+
+    }
+}
+
+message InitializeDto {
+    aelf.Address auction_contract_address = 1;
 }
 
 // a custom message, used as the return type of the Hello action

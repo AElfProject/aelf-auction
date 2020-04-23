@@ -1,3 +1,6 @@
+using AElf.Contracts.Auction;
+using AElf.CSharp.Core.Extension;
+using AElf.Kernel;
 using Google.Protobuf.WellKnownTypes;
 
 namespace AElf.Contracts.CallerContract
@@ -18,6 +21,29 @@ namespace AElf.Contracts.CallerContract
         public override HelloReturn Hello(Empty input)
         {
             return new HelloReturn {Value = "Hello World!"};
+        }
+
+        public override Empty Create(Empty input)
+        {
+            var auctionId = Context.GenerateId(State.AuctionContract.Value, null);
+
+            State.AuctionContract.Create.Send(new CreateDto()
+            {
+                Callback = Context.Self,
+                Receiver = Context.Sender,
+                ExpiredDate = Context.CurrentBlockTime.AddSeconds(100),
+                MinAmount = 1,
+                TokenSymbol = "ELF"
+            });
+
+            return new Empty();
+        }
+
+        public override Empty Initialize(InitializeDto input)
+        {
+            State.AuctionContract.Value = input.AuctionContractAddress;
+
+            return new Empty();
         }
     }
 }

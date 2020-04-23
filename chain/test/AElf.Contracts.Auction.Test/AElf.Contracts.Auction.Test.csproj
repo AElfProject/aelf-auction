@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AElf.Contracts.TestKit" Version="1.0.0-preview2-18373" />
+    <PackageReference Include="AElf.Contracts.TestKit" Version="1.0.0-preview2-18375" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,7 +43,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AElf.Contracts.MultiToken" Version="1.0.0-preview2-18373" />
+    <PackageReference Include="AElf.Contracts.MultiToken" Version="1.0.0-preview2-18375" />
   </ItemGroup>
 
 </Project>
