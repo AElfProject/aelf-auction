@@ -63,10 +63,14 @@ namespace AElf.Contracts.Deployer
                     var auditor = new CSharpContractAuditor();
                     auditor.Audit(patchedCode, null);
                 }
-                catch (Exception ex)
+                catch (CSharpCodeCheckException ex)
                 {
-                    Console.WriteLine(ex);
-                }
+                    foreach (var finding in ex.Findings)
+                    {
+                        // Print error in parsable format so that it can be shown in IDE
+                        Console.WriteLine($"error: {finding.ToString()}");
+                    }
+                }  
             }
 
             File.WriteAllBytes(saveAsPath, patchedCode);
