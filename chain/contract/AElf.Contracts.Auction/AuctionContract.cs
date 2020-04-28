@@ -38,6 +38,7 @@ namespace AElf.Contracts.Auction
                 TokenSymbol = input.TokenSymbol,
                 Callback = input.Callback,
                 Receiver = input.Receiver,
+                MinIncreaseAmount = input.MinIncreaseAmount
             };
             State.Auctions[id] = auction;
 
@@ -108,7 +109,9 @@ namespace AElf.Contracts.Auction
                 };
             }
 
-            if (auction.LastBidderAmount >= input.Amount || auction.MinAmount > input.Amount)
+            if (auction.LastBidderAmount >= input.Amount ||
+                auction.MinAmount > input.Amount ||
+                auction.LastBidderAmount + auction.MinIncreaseAmount > input.Amount)
             {
                 return new BidResultDto()
                 {

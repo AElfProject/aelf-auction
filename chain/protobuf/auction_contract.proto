@@ -93,6 +93,8 @@ message Auction {
     AuctionStatus status = 7;
 
     aelf.Address callback = 8;
+
+    int64 min_increase_amount = 9;
 }
 
 message CreateDto {
@@ -101,7 +103,8 @@ message CreateDto {
     int64 min_amount = 3;
     google.protobuf.Timestamp expired_date = 4;
 
-    aelf.Address callback = 8;
+    aelf.Address callback = 5;
+    int64 min_increase_amount = 6;
 }
 
 
