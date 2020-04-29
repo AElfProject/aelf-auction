@@ -1,7 +1,6 @@
 using System.IO;
 using System.Linq;
 using Acs0;
-using AElf.Blockchains.BasicBaseChain.ContractNames;
 using AElf.Contracts.CallerContract;
 using AElf.Contracts.MultiToken;
 using AElf.Contracts.TestKit;

@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <PackageId>AElf.Contracts.Deployer</PackageId>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageId>AElf.Boilerplate.ContractDeployer</PackageId>
         <TargetFramework>netcoreapp3.1</TargetFramework>
         <OutputType>Exe</OutputType>
         <Description>Smart contract deployer.</Description>
@@ -11,9 +10,9 @@
         <None Pack="true" PackagePath="build\" Include="*.targets;" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="AElf.CSharp.CodeOps" Version="1.0.0-preview2-18375" />
-        <PackageReference Include="AElf.Runtime.CSharp.Core" Version="1.0.0-preview2-18375" />
-        <PackageReference Include="AElf.Types" Version="1.0.0-preview2-18375" />
+        <PackageReference Include="AElf.CSharp.CodeOps" Version="1.0.0-preview2" />
+        <PackageReference Include="AElf.Runtime.CSharp.Core" Version="1.0.0-preview2" />
+        <PackageReference Include="AElf.Types" Version="1.0.0-preview2" />
         <PackageReference Include="CommandLineParser" Version="2.7.82" />
     </ItemGroup>
     <Target Name="CopyDlls" AfterTargets="AfterBuild">

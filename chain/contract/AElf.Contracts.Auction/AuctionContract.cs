@@ -173,7 +173,7 @@ namespace AElf.Contracts.Auction
 
         private Hash GetVirtualAddressToken(Address address)
         {
-            return HashHelper.ComputeFromByteArray(address.ToByteArray());
+            return HashHelper.ComputeFrom(address.ToByteArray());
         }
 
         private Hash GetSenderVirtualAddressToken()
