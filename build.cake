@@ -7,7 +7,7 @@ var srcPath      = rootPath + "chain/src/";
 var contractPath = rootPath + "chain/contract/";
 var testPath     = rootPath + "chain/test/";
 var distPath     = rootPath + "chain/aelf-node/";
-var solution     = rootPath + "chain/AElf.Boilerplate.sln";
+var solution     = rootPath + "chain/AElf.Contracts.Auction.sln";
 var srcProjects  = GetFiles(srcPath + "**/*.csproj");
 var contractProjects  = GetFiles(contractPath + "**/*.csproj");
 
@@ -28,7 +28,7 @@ Task("Restore")
     .Description("restore project dependencies")
     .Does(() =>
 {
-    DotNetCoreRestore("./chain/AElf.Boilerplate.sln", new DotNetCoreRestoreSettings
+    DotNetCoreRestore(solution, new DotNetCoreRestoreSettings
     {
         Verbosity = DotNetCoreVerbosity.Quiet,
         Sources = new [] { "https://www.myget.org/F/aelf-project-dev/api/v3/index.json", "https://api.nuget.org/v3/index.json" }
