@@ -87,7 +87,7 @@ Task("Test-with-Codecov")
     };
     var codecovToken = "$CODECOV_TOKEN";
     var actions = new List<Action>();
-    var testProjects = GetFiles("./test/*.Tests/*.csproj");
+    var testProjects = GetFiles("./chain/test/*.Tests/*.csproj");
 
     foreach(var testProject in testProjects)
     {
@@ -134,6 +134,21 @@ Task("Run-Unit-Tests")
     {
         DotNetCoreTest(testProject.FullPath, testSetting);
     }
+});
+Task("Upload-Coverage")
+    .Does(() =>
+{
+    var reports = GetFiles("./chain/test/*.Tests/TestResults/*/coverage.cobertura.xml");
+
+    foreach(var report in reports)
+    {
+        Codecov(report.FullPath,"$CODECOV_TOKEN");
+    }
+});
+Task("Upload-Coverage-Azure")
+    .Does(() =>
+{
+    Codecov("./CodeCoverage/Cobertura.xml","$CODECOV_TOKEN");
 });
 Task("Publish-MyGet")
     .IsDependentOn("Build-Release")
